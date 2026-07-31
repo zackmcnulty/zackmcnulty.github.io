@@ -1,0 +1,21 @@
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="site-name" href="{{ '/' | relative_url }}" aria-label="Zachary McNulty, home">
+      <span class="site-mark">ZM</span>
+      <span>Zachary McNulty</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <span class="sr-only">Toggle navigation</span>
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
+      {% assign current = page.url %}
+      <a {% if current == '/' %}class="active" aria-current="page"{% endif %} href="{{ '/' | relative_url }}">About</a>
+      <a {% if current contains '/cv' %}class="active" aria-current="page"{% endif %} href="{{ '/cv/' | relative_url }}">CV</a>
+      <a {% if current contains '/organizational' %}class="active" aria-current="page"{% endif %} href="{{ '/organizational/' | relative_url }}">Organizational</a>
+      <a {% if current contains '/coursework' %}class="active" aria-current="page"{% endif %} href="{{ '/coursework/' | relative_url }}">Coursework</a>
+      <a {% if current contains '/exposition' %}class="active" aria-current="page"{% endif %} href="{{ '/exposition/' | relative_url }}">Exposition</a>
+      <a {% if current contains '/miscellaneous' %}class="active" aria-current="page"{% endif %} href="{{ '/miscellaneous/' | relative_url }}">Miscellaneous</a>
+    </nav>
+  </div>
+</header>
