@@ -54,6 +54,7 @@ h3 { margin: 34px 0 12px; font-size: 27px; }
 .portrait-wrap { position: relative; }
 .portrait-wrap::before { content: ""; position: absolute; inset: 22px -18px -18px 22px; border: 1px solid var(--warm); border-radius: 150px 150px 16px 16px; }
 .portrait { position: relative; display: block; aspect-ratio: 4/5; width: 100%; object-fit: cover; object-position: center top; border-radius: 150px 150px 16px 16px; filter: saturate(.86); }
+.portrait { object-position: 30% center; }
 .bio { margin-top: 66px; columns: 2; column-gap: 56px; }
 .bio p:first-child { margin-top: 0; }
 .contact-line { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-weight: 500; }
@@ -63,6 +64,12 @@ h3 { margin: 34px 0 12px; font-size: 27px; }
 .card h2, .card h3 { margin-top: 0; }
 .card p:last-child { margin-bottom: 0; }
 .meta { color: var(--muted); font-size: 14px; }
+.project-card { display: block; padding: 0; overflow: hidden; color: var(--ink); text-decoration: none; transition: transform .2s ease, box-shadow .2s ease; }
+.project-card:hover { color: var(--ink); transform: translateY(-3px); box-shadow: 0 22px 52px rgba(31, 48, 37, 0.13); }
+.project-preview { display: block; width: 100%; aspect-ratio: 3/2; object-fit: cover; border-bottom: 1px solid var(--line); }
+.project-copy { display: flex; flex-direction: column; align-items: flex-start; padding: 24px 28px 28px; }
+.project-title { margin: 5px 0 9px; font-family: var(--serif); font-size: 28px; line-height: 1.12; }
+.project-copy .text-link { margin-top: 18px; color: var(--accent); }
 .text-link { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; text-decoration: none; }
 .text-link::after { content: "→"; transition: transform .2s; }
 .text-link:hover::after { transform: translateX(4px); }
@@ -86,6 +93,7 @@ h3 { margin: 34px 0 12px; font-size: 27px; }
 .coursework .panel p:first-child { margin-top: 0; }
 .coursework .panel pre { margin-bottom: 0; white-space: pre-wrap; font: 14px/1.6 var(--sans); color: var(--muted); }
 .coursework ul { padding-left: 22px; }
+.coursework .section-intro { margin-top: -8px; color: var(--muted); font-family: var(--serif); font-size: 21px; }
 
 .site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 .footer-inner { min-height: 86px; display: flex; justify-content: space-between; align-items: center; }
