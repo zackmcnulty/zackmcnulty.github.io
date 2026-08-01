@@ -17,3 +17,39 @@ document.querySelectorAll('.accordion').forEach((button) => {
     if (panel) panel.style.display = isOpen ? 'block' : 'none';
   });
 });
+
+document.querySelectorAll('[data-slideshow]').forEach((slideshow) => {
+  const slides = [...slideshow.querySelectorAll('.slide')];
+  const dots = [...slideshow.querySelectorAll('.slide-dot')];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let current = 0;
+  let timer;
+
+  const showSlide = (index) => {
+    current = index;
+    slides.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === index));
+    dots.forEach((dot, dotIndex) => {
+      const isActive = dotIndex === index;
+      dot.classList.toggle('active', isActive);
+      dot.setAttribute('aria-pressed', String(isActive));
+    });
+  };
+
+  const stop = () => window.clearInterval(timer);
+  const start = () => {
+    stop();
+    if (!reduceMotion && slides.length > 1) {
+      timer = window.setInterval(() => showSlide((current + 1) % slides.length), 5500);
+    }
+  };
+
+  dots.forEach((dot, index) => dot.addEventListener('click', () => {
+    showSlide(index);
+    start();
+  }));
+  slideshow.addEventListener('mouseenter', stop);
+  slideshow.addEventListener('mouseleave', start);
+  slideshow.addEventListener('focusin', stop);
+  slideshow.addEventListener('focusout', start);
+  start();
+});
