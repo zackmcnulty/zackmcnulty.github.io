@@ -20,7 +20,16 @@ document.querySelectorAll('.accordion').forEach((button) => {
 
 document.querySelectorAll('[data-slideshow]').forEach((slideshow) => {
   const slides = [...slideshow.querySelectorAll('.slide')];
-  const dots = [...slideshow.querySelectorAll('.slide-dot')];
+  const controls = slideshow.querySelector('.slideshow-controls');
+  const dots = slides.map((_, index) => {
+    const dot = document.createElement('button');
+    dot.className = `slide-dot${index === 0 ? ' active' : ''}`;
+    dot.type = 'button';
+    dot.setAttribute('aria-label', `Show photograph ${index + 1}`);
+    dot.setAttribute('aria-pressed', String(index === 0));
+    controls?.appendChild(dot);
+    return dot;
+  });
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let current = 0;
   let timer;

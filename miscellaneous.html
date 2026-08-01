@@ -10,13 +10,19 @@ permalink: /miscellaneous/
 
   <div class="slideshow" data-slideshow aria-label="A rotating selection of photographs">
     <div class="slideshow-stage">
-      <img class="slide active" src="{{ '/assets/images/slideshow/coastal-ride-placeholder.png' | relative_url }}" alt="A winding coastal road above a calm bay">
-      <img class="slide" src="{{ '/assets/images/slideshow/climbing-placeholder.png' | relative_url }}" alt="A climber on warm granite formations in a mountain landscape">
+      {% assign slideshow_files = site.static_files | sort: "path" %}
+      {% assign first_slide = true %}
+      {% for image in slideshow_files %}
+        {% if image.path contains '/assets/images/slideshow/' %}
+          {% assign extension = image.extname | downcase %}
+          {% if extension == '.jpg' or extension == '.jpeg' or extension == '.png' or extension == '.webp' %}
+            <img class="slide{% if first_slide %} active{% endif %}" src="{{ image.path | relative_url }}" alt="Photograph from Zachary McNulty's collection">
+            {% assign first_slide = false %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
     </div>
-    <div class="slideshow-controls" aria-label="Choose a slide">
-      <button class="slide-dot active" type="button" aria-label="Show coastal cycling image" aria-pressed="true"></button>
-      <button class="slide-dot" type="button" aria-label="Show climbing image" aria-pressed="false"></button>
-    </div>
+    <div class="slideshow-controls" aria-label="Choose a slide"></div>
   </div>
 
   <section class="section-block">
