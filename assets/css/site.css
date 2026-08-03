@@ -76,6 +76,10 @@ h3 { margin: 34px 0 12px; font-size: 27px; }
 .text-link:hover::after { transform: translateX(4px); }
 
 .section-block { padding: 8px 0 24px; border-top: 1px solid var(--line); }
+.exposition-section { margin-top: 62px; }
+.exposition-section.section-block { margin-top: 72px; }
+.exposition-section h2 { margin-top: 0; }
+.section-subtitle { max-width: 680px; margin-top: -8px; color: var(--muted); font-family: var(--serif); font-size: 21px; }
 .event-list { padding: 0; list-style: none; }
 .event { display: grid; grid-template-columns: 125px 1fr; gap: 22px; padding: 25px 0; border-bottom: 1px solid var(--line); }
 .event-date { color: var(--warm); font-size: 14px; font-weight: 600; }
