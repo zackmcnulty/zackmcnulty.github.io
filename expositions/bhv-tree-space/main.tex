@@ -1,0 +1,322 @@
+\input{preamble}
+\usepackage[authoryear,square]{natbib}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+
+\title{Brownian Motion, Bridges, and Bayesian Inference in Phylogenetic Tree Space}
+\author{Zachary McNulty}
+\date{November 2025}
+
+
+%%%%%%% presentation specific commands
+
+\begin{document}
+
+\maketitle
+
+\hacross
+
+\noindent These notes are based on the paper \cite{woodman2025brownianmotionbridgesbayesian} plus some additional background that I have provided. \\
+
+\section{Background}
+
+The goal of phylogenetics is to use currently available information about a collection of species to try to infer the historical evolutionary tree, the sequence of shared common ancestors and speciation events that led to these modern day species. Typically we are interested in modeling both the \textit{topology} of the evolutionary tree, the sequence of speciation events that separated species, as well as its \textit{metric structure}, the amount of time passing between these speciation events. Historically, this was done with a variety of morphological features, from skeletal structures to plumage patterns, but since the discovery of DNA, this genetic information has played an increasing predominant role. 
+
+Given the DNA sequences for a specific gene shared across a collection of species, it is not too difficult to see how one might reconstruct the evolutionary tree: simply specify a model of mutation and select the evolutionary tree that is most likely to be obtained under this probabilistic model. For example, the simplest model, the Jukes-Cantor model, just assumes that each base pair $\{A,C,T,G\}$ in DNA mutates to another at rate $\mu$ uniformly at random. But as genomic sequencing improves and more genetic information becomes available, things become more difficult. For one, running the same analysis on two different gene sequences might produce significantly different tree topologies. Hence it becomes necessary to try to develop procedures that can somehow aggregate information across different genes.
+
+The simplest approach is just concatenation, which treats all the available genetic information as one long string and running the above maximum-likelihood procedure. Beyond this, there are consensus methods which run the MLE procedure individually on each gene first and then uses the result collection of phylogenetic trees as inputs to a secondary procedure. For one, ASTRAL \cite{mirarab2014astral} attempts to find the evolutionary tree which "overlaps" the most with the collection of gene trees by solving an optimization problem:
+%
+\[\hat{T} = \arg\max_T \sum_{g \in \cG} d_{quartet}(g,T)\]
+%
+\noindent While many of these consensus methods have been proven to be asymptotically consistent, they often lack nice finite-sample guarantees. Even when we can develop these finite-sample bounds, statistical analysis is sort of ad-hoc because these models are not built on top of well-understood statistical theory.
+
+We would like to somehow apply standard statistical theory, like concentration of the sample mean, PCA, and Bayesian inference models, but it is just difficult in a discrete space like this without much geometry. To get a flavor for what goes wrong, I'll start by discussing a traditional approach using Frechet means, and then move on to the new paper.
+
+\begin{figure}[b]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/NNI.png}
+    \caption{An example of two possible NNI moves.}
+    \label{fig:nni_move}
+\end{figure}
+
+
+% Frechet Means
+\subsection{Frechet Means}
+
+\noindent Recall that in $\mathbb{R}^d$ the sample mean $\overline{x}$ of data points $\{x_i\}_{i=1}^n$ has the variational characterization:
+%
+\[\overline{x} = \arg\min_{c \in \R^d} \sum_{i=1}^n ||x_i - c||_2^2\]
+%
+\noindent This is just a consequence of the bias-variance decomposition of squared error. Likewise, we can extend this to the population level. Given a probability distribution $\mu$ on $\R^d$ we know: 
+%
+\[ \E_{X \sim \mu} X = \arg \min_{c \in \mathbb{R}^d} \E_{X \sim \mu} ||X - c||_2^2\]
+%
+\noindent The previous equation is really just a special case where $\mu$ is the empirical distribution of $\{x_i\}$. The \textit{Frechet mean} is a natural extension of the ordinary Euclidean mean to a general metric space $(\cX, d)$. Namely, in this new space we can define the sample mean as:
+%
+\[\overline{x} := \arg \min_{c \in \cX} \sum_{i=1}^n d(x_i, c)^2\]
+%
+\noindent and likewise at the population level. If the space $(\cX, d)$ is nice enough, the Frechet mean exists, is unique, and has the similar nice concentration properties to the sample mean in Euclidean space.
+
+\begin{thm}[Properties of Empirical Frechet Mean]
+    If $(\cX, d)$ is a $CAT(0)$ space and $\mu$ has finite second moment, then the Frechet mean of $\mu$ exists and is unique \cite{sturm2003_existence_barycenters}. Moreover if $\mu$ is sufficiently concentrated then the empirical Frechet mean of iid samples $X_i \sim \mu$ is concentrated around $\mu$ \cite{brunel2025finitesampleboundsbarycenter}.
+\end{thm}
+
+
+% BHV Space
+\subsection{Introduction to BHV space}
+
+One common way of defining a metric on the space of trees is to count the number of "local" changes it takes to go from one tree to another. An example of such a change is the \textit{nearest neighbor interchange (NNI)} which permutes the four subtrees adjacent to a given edge in an (unrooted) binary tree. Figure \ref{fig:nni_move} gives an example. In the rooted case, this is equivalent to the standard tree rotations found in the likes of AVL trees.
+
+ In this picture, the space of phylogenetic trees is just an undirected graph: each vertex is a different tree and an edge connects two trees if they differ by an NNI move. One issue with this space is that shortest paths are not unique. 
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.5,
+    node distance=1.5cm,
+    every node/.style={circle, draw, fill=blue!20, minimum size=8mm}
+]
+
+% Leftmost node
+\node (L) at (0,0) {T};
+
+% Rightmost node
+\node (R) at (8,0) {T'};
+
+% Top arc nodes (concave up)
+\node (T1) at (2, 2) {};
+\node (T2) at (4, 2.5) {};
+\node (T3) at (6, 2) {};
+
+% Bottom arc nodes (concave down)
+\node (B1) at (2, -2) {};
+\node (B2) at (4, -2.5) {};
+\node (B3) at (6, -2) {};
+
+% Draw edges for top arc
+\draw[thick] (L) -- (T1);
+\draw[thick] (T1) -- (T2);
+\draw[thick] (T2) -- (T3);
+\draw[thick] (T3) -- (R);
+
+% Draw edges for bottom arc
+\draw[thick] (L) -- (B1);
+\draw[thick] (B1) -- (B2);
+\draw[thick] (B2) -- (B3);
+\draw[thick] (B3) -- (R);
+
+\end{tikzpicture}
+\caption{Nonunique paths in the discrete space of phylogenetic trees. Note both the upper center vertex and the lower center vertex would be a Frechet mean of $\{T, T'\}$}
+\label{fig:oval_graph}
+\end{figure}
+
+It is not hard to see that in such a discrete space, the Frechet mean is not unique, and in general two different means may be far apart. This is problematic because we would like to produce a single estimate $\hat{T}$ of the true evolutionary tree and study its asymptotic properties. The Billera-Holmes-Vogtmann (BHV) space \cite{BILLERA_2001_bhv_space} was in a sense \textit{designed} to solve this uniqueness issue. 
+
+Heuristically, the space BHV $\cT_n$ of phylogenetic trees on $n$ leaves is just a collection of orthants $\R^{N-3}_{\geq 0}$, one for each distinct tree topology. Each coordinate corresponds to the length of a particular internal edge, and two orthants are glued together on the lower-dimensional face cooresponding to coordinate $i$ if they differ by a single NNI move at the corresponding internal edge $e_i$. Hence each codimensional-1 face intersects exactly three $n-cubes$. Part of the space $\cT_5$ is shown in Figure \ref{fig:bhv_5}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/bhv_5.jpg}
+    \caption{Part of the space $BHV_5$. Here we show a few orthants glued together at their lower-dimensional face.}
+    \label{fig:bhv_5}
+\end{figure}
+
+\begin{thm}
+    The space $\cT_n$ is a $CAT(0)$ space. In particular, it has unique geodesics.
+\end{thm}
+
+\noindent As a corollary, we see the empirical Frechet mean always exists. Moreover, if we restrict our branch lengths to be all bounded by some constant $C$ then $\cT_n$ is compact and we get strong concentration around the population Frechet mean. 
+
+% Brownian Motion in BHV Space
+\section{Brownian Motion in BHV space}
+
+
+
+The Fr\'echet mean $\overline{x}$ gives a model for the "center" of our collection of trees. There are analogous ways of defining its "dispersion". For one, we could look at the sample variance:
+%
+\[ s^2 = \frac{1}{n-1} \sum_{i=1}^n d_{BHV}(x_i, \overline{x})^2\]
+%
+
+There's a whole literature on central limit theorems for Fr\'echet means, for one \cite{hotz2022centrallimittheoremintrinsic} or for stratified spaces in particular \cite{mattingly2023centrallimittheoremsfrechet}. 
+
+
+A more parametric approach to summarizing a collection of trees would be to assume they are generated from some parametric model and to attempt to infer the parameters of this model. Of course, the classical choice for such a model would be the Gaussian. There are several nonequivalent models of what a Gaussian "should be" on such a space, and of course developing a notion of Brownian motion is one such way of generating one. 
+
+The paper \cite{nye2019_brownian_motion_cubical_complexes} originally constructs BM on cubical complexes, of which $BHV_N$ is a special case. Let $I = [0,1]$. A cubical complex is a collection of hypercubes $I^n$ glued together along their lower-dimensional faces: a simplicial complex except we use cubes instead of triangles. We say such a complex is $n-dimensional$ if it contains an $n-cube$ $I^n$ and no higher dimensional cubes.
+
+Heuristically, within the interior of a given $n-cube$, it is clear $B_t$ should just evolve according to a standard $n-dimensional$ Brownian motion. When $B_t$ hits a codimensional-1 face $f$, we want $B_t$ to choose a new $n-cube$ uniformly at random from those adjacent to $f$ and continue our standard Brownian motion. Namely, $B_t$ will have two parts essentially:
+
+\begin{itemize}
+    \item A reflected brownian motion in $I^n$ which dictates our  motion in the interior of the current $n-cube$.
+
+    \item A discrete random walk on bipartite graph $G_\cX$ with a vertex for each $n-cube$ and each $(n-1)-cube$ and an edge $(u,v)$ if $v$ is a face of $u$. This walk dictates the transitions between the different $n-cubes$ of $\cX$. 
+\end{itemize}
+
+The main technical issue is that when we cross $f$, we will tend to recross it infinitely many times for every positive window of time afterwards before drifting away, so we have to be careful how we define our discrete random walk.  
+
+ To formalize this, we start by defining a Brownian motion $B_t$ on the hypercube $I^n$, which is relatively straightforward. Simply let each coordinate evolve independently as a standard Brownian motion on $[0,1]$ with reflecting boundary conditions. For later use, we show that we can reasonably make sense of the sequence of faces $B_t$ hits. Namely, given a continuous path $\eta:[0,1] \to I^n$ let $\pi(\eta)$ be defined as the time-ordered sequence of codimensional-1 faces $(f_1, f_2, ...)$ that $\eta$ meets with consecutive repeats removed (so $f_i \neq f_{i+1})$. We must show there are not too many transitions between different faces:
+
+ \begin{lem}
+     If $x_0 \in I^n$ does not lie in a codimensional-2 face then $\pi(\eta)$ is well-defined and finite a.s. with respect to the distribution of $B_t$. 
+ \end{lem}
+
+ \noindent This essentially shows us that the discrete walk corresponding to a continuous Brownian motion path is a.s. well-defined and just a standard simple random walk path on our undirected graph $G_\cX$.
+
+ \begin{proof}[Proof Outline]
+     The only way for $B_t$ to hit a codimensional-2 face is if two coordinates $(B^i_t, B^j_t)$ hit $(0,0)$. But planar brownian motion hits the origin with probability zero, so $\pi(\eta)$ is well-defined.
+
+     To prove $\pi(\eta)$ is a.s. finite, restrict to paths $\eta$ that stay distance at least $\rho$ from a codimensional-2 face. Show such paths a.s. have $\pi(\eta)$ finite, as they must travel at least distance $\rho$ between faces, and Brownian motion cannot travel "that far" in finite time. Then send $\rho \to 0$.
+ \end{proof}
+
+ \noindent Now we define our Brownian motion in terms of our reflected Brownian motion $W_t$ on $I^n$ as:
+ %
+
+ \begin{equation}
+      \P(B_t \in A) = \sum_\omega p(\omega) \cdot \P(W_t \in \cP(A \cap \hat{C}^\omega)) \qquad p(w) = \prod_{i} \frac{1}{deg(v_i)}
+      \label{eqn:bm_on_bhv_distribution}
+ \end{equation}
+
+ %
+\noindent where the sums essentially sum over all discrete random walk paths $(u_0, f_1, u_1, ..., f_k, u_k)$ with non-repeating faces (e.g. $f_i \neq f_{i+1})$ and $\hat{C}^\omega$ is all continuous paths $\eta$ whose corresponding discrete walk is $\omega$. Lastly $\cP$ is the projection map. If $W_t$ has drift zero, covariance $\sigma^2I_n$, and $W_0 = x_0$, we can view our Brownian motion $B_t$ as parameterized by the same mean and dispersion parameters $x_0, \sigma^2$. 
+
+% Inference with BM
+\subsection{Using Brownian Motion for Inference}
+
+We now have a reasonable model for Brownian motion, parameterized by a mean $x_0$ and a dispersion $\sigma^2$ that we would like to use  to help us understand a tree-generating process. Namely, if we have sampled trees $\{x_i\}_{i=1}^n \in BHV_N$, we would like to try to use them to estimate $x_0, \sigma^2$. The Bayesian approach would put some kind of prior $\pi$ on these parameters and then use our samples $\{x_i\}$ to estimate the posteriors.
+
+\[\P(x_0, \sigma^2 | \{x_i\}) \propto \pi(x_0, \sigma^2) \cdot \prod_{i=1}^n \P_{B_1}(x_i | x_0, \sigma^2)\]
+
+\noindent where $\P_{B_1}$ is the distribution of our Brownian motion $B_t(x_0, \sigma^2)$ at time $t=1$. Of course, the distribution of $B_1$ is intractable. Even though we have Equation \eqref{eqn:bm_on_bhv_distribution}, its not easy to understand the distribution of the reflected random walk. 
+
+Even calculating normalizing constants in this space for relative simple distributions can be challenging because you have to constantly keep track of how many orthants you are intersecting. For example, in $BHV_4$ the area of the ball $B_{BHV}(x_0, \epsilon)$ is $3\epsilon - d_{BHV}(x_0, 0) \wedge \epsilon$, seen in Figure \ref{fig:balls_in_BHV4}. 
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=2, thick]
+  % Origin
+  \coordinate (O) at (0,0);
+
+  % Define directions for the three rays (orthants)
+  \coordinate (A) at (1,0);
+  \coordinate (B) at (150:1);
+  \coordinate (C) at (270:1);
+
+  % Draw the three orthants (black rays)
+  \draw[black, line width=1pt] (O) -- (A);
+  \draw[black, line width=1pt] (O) -- (B);
+  \draw[black, line width=1pt] (O) -- (C);
+
+
+  % Point x_0 slightly offset from origin
+  \coordinate (X0) at (0.15,0);
+  \filldraw[blue] (X0) circle (0.03) node[right=4pt, black] {$x_0$};
+
+  % Draw blue "ball" around x_0 intersecting all three rays
+  \draw[blue, thick, opacity=0.6] (X0) circle (0.4);
+
+  % Optional: show distances
+  %\draw[dashed, gray] (O) -- (X0) node[midway, above right] {$d_{BHV}(x_0,0)$};
+
+\end{tikzpicture}
+
+    \caption{An $\epsilon$-ball in $BHV_4$}
+    \label{fig:balls_in_BHV4}
+\end{figure}
+
+
+This problem is only exacerbated near lower-dimensional faces, where balls intersect many orthants in complicated ways. Thus we approximate $B_1$ in two steps:
+
+\begin{enumerate}
+    \item We approximate our continuous walk by a discrete walk.
+
+    \item If the steps of our discrete walk are small enough, they typically cross at most one face (of codimension-1). In this case, the distribution of the steps is much easier to understand.
+\end{enumerate}
+
+
+\subsubsection{Discrete Approximation using Gaussian Via Geodesic Firing}
+
+Suppose that $x_0$ is in the interior of an $n-cube$. Given dispersion parameter $\tau^2$ define the \textit{gaussian via geodesic firing } $GGF(x_0, \tau^2)$ via:
+
+\begin{itemize}
+    \item Sample a direction $v \sim N(0, \tau^2 I_{N-3})$. 
+    
+    \item Follow the unique geodesic starting at $x_0$ in direction $v$. 
+
+    \item If you intersect a codimensional-1 face, choose one of the three adjacent $n-cubes$ uniformly at random and continue within that cube in the same direction. 
+
+    \item Continue until you travel total distance $|v|$.
+\end{itemize}
+
+\noindent If we iterate this process, we obtain an analog of the simple random walk with Gaussian increments. Unsurprisingly, we get the following central limit theorem.
+
+\begin{lem}
+    If $y_0 \equiv x_0$ and we sample $y_i | y_{i-1} \sim GGF(y_{i-1}, \sigma^2/m)$ let $W(x_0, \sigma^2; m)$ denote the distribution of $y_m$. Then $W(x_0, \sigma^2; m)\Rightarrow B_1(x_0, \sigma^2)$ as $m \to \infty$. 
+\end{lem}
+
+\noindent Hence our first approximation:
+
+\[\P(x_0, \sigma^2 | \{x_i\}) \propto \pi(x_0, \sigma^2) \cdot \prod_{i=1}^n \P_{B_1}(x_i | x_0, \sigma^2) \approx \pi(x_0, \sigma^2) \cdot \prod_{i=1}^n \P_{W}(x_i | x_0, \sigma^2; m )\]
+
+\noindent Of course, $\P_{W(x_0, \sigma^2; m)}(x_i)$ is still intractable due to the combinatorial nature of the discrete walks and the complicated reflection process. The key idea is that if we choose the number of steps $m$ to be large enough, each step in our discrete walk crosses at most one face. In this case, the distribution of the individual steps of $W$ are more tractable. Hence we ought to condition on the individual points $y_i$ in our discrete walk, which is the content of our next section. 
+
+% marginalization over bridges
+\subsubsection{Marginalization over bridges}
+
+As discussed previously, we can essentially observe:
+%
+\[\P_W(x_i | x_0, \sigma^2; m) = \int \P_W(\mathbf{y}, x_i | x_0, \sigma^2; m) \P_W(d\mathbf{y}) = \int \prod_{j=1}^m f_{GGF}(y_j | y_{j-1}; \sigma^2/m) \P_W(d\mathbf{y})\]
+%
+\noindent where the integral is over the distribution of \textit{bridges} from $x_0$ to $x_i$. Like we mentioned above the distribution of $f_{GGF}$ can easily be approximated when $m$ is large enough. We then just need to sample many bridges and we can approximate $\P(d\mathbf{y})$ by its empirical distribution. Overall then if we sample $M$ bridges $\mathbf{y}^1, ..., \mathbf{y}^M$, we get:
+
+\begin{equation}
+    f(x_0, \sigma^2 | \mathbf{x}) \propto \frac{1}{M} \sum_{\ell=1}^M\pi(x_0, \sigma^2)  \cdot \prod_{i=1}^n \prod_{j=1}^m f_{GGF}(y^\ell_{i,j} | y^\ell_{i, j-1}, \sigma^2/m)
+\end{equation}
+
+\noindent Again this only calculates the posterior up to the proportionality constant, but we can always use MCMC to sample from this posterior. All that is left to do is sample a bridge $\mathbf{y}_i$ from $x_0$ to $x_i$ of this discrete random walk $W(x_0, \sigma^2; m)$. 
+
+% Sampling Bridges
+\subsubsection{Sampling Bridges}
+
+To sample bridges, we take inspiration from the standard Brownian bridge. There recall that if we have a Gaussian random walk $Y_0, Y_1, ..., Y_m$ with $Y_0$ then:
+%
+\[Y_j | \{Y_{j-1} = y_{j-1}, Y_m = x^*\} \sim N\left(y_{j-1} + \frac{1}{m-j + 1}(x^* - y_{j-1}), \quad \frac{m-j}{m-j+1} \cdot \frac{\sigma^2}{m} I_{N-3}\right)\]
+%
+\noindent Namely, we follow the geodesic from $y_{j-1}$ to $x^*$ for time $\frac{1}{m-j+1}$ and add a small gaussian perturbation. Likewise, for our discrete random walk we can follow a similar procedure to simulate a bridge:. Given $y_0 = x_0$ and conditioning on $W(x_0, \sigma^2; m) = x^*$ we run the following:
+
+\begin{enumerate}
+    \item Construct the geodesic $\Gamma_{y_{j-1}, x^*}$ and follow it distance $\frac{1}{m-j+1}$ to get $\mu_j$. 
+
+    \item Sample $y_j \sim GGF(\mu_j, \tau_{j,m})$ where $\tau_{j,m} = \frac{m-j}{m-j+1} \cdot \frac{\sigma^2}{m}$.
+
+    \item If $\Gamma_{y_{j-1}, y_j}$ cross a face of codimension greater than one, restart.
+\end{enumerate}
+
+\noindent The last step is because the $GGF$ density is intractable to calculate at such lower dimensional faces. Again this is only gives approximately the correct distribution. 
+
+In the rest of the paper, the author proposes a few heuristics that can improve the algorithm. For one, step (3) can cause the algorithm to fail quite frequently, so the paper proposes several adjustments that can be made to reduce the failure rate. Also, as we discussed above the approximation of $f_{GGF}$ becomes worse the closer we get to lower-dimensional faces, so the author also proposes some methods of perturbing the walk in a way that stays far enough away from such faces.
+
+\section{Final Remarks}
+
+These parameters give us a new notion of the "mean" and "dispersion" of our sample of trees. Moreover, once we learn the parameters, we can use them to generate new potential trees for downstream usage. 
+
+Some natural questions I had after reading the article:
+
+\begin{itemize}
+    \item  Will the MLE for the center $x_0$ of our brownian motion not just be the Fr\'echet mean? At least, we could assume it was and then try to learn the variance parameter $\sigma^2$ possibly?
+
+    \item The author does not really discuss it, but I imagine we can develop analogs of the Brownian motion where we choose the reflecting brownian motion $W_t$ on $I^n$ to be non-standard. Namely, assume $W_t$ has drift $\mu$ and covariance $\Sigma$ more generally rather than the case $\mu = 0, \Sigma = \sigma^2 I$ discussed in this paper. The only technical difficulty is that we would have to find a reasonable way of adjusting the discrete random walk to no longer uniformly choose an $n-cube$ adjacent to the current face. e.g. surely if $\mu = (1,0)$ and we exit out of the right side of $I^2$ then it ought to be more likely to leave the current cube than return due to the drift.
+
+\end{itemize}
+
+
+
+
+
+% Print bibliography
+\newpage
+\bibliographystyle{plainnat}  % Choose a style (e.g., plainnat, abbrvnat, etc.)
+\bibliography{references}     % Replace "references" with your .bib file name (no extension)
+
+\end{document}

@@ -1,0 +1,261 @@
+\input{preamble}
+
+
+\title{Kantorovich Duality and the Wasserstein Space}
+\author{Zachary McNulty}
+\date{April 2023}
+
+
+%%%%%%% presentation specific commands
+
+\begin{document}
+
+\maketitle
+
+\hacross
+
+\noindent Throughout the following assume the standard conditions: the cost $c(x,y)$ is lower semicontinuous and bounded below by the sum $a(x) + b(y)$ of two upper semicontinuous functions $a \in L^1(\mu), b \in L^1(\nu)$, and $\cX, \cY$ are Polish spaces.
+
+\section{Kantorovich Duality}
+
+
+
+\noindent Instead of trying to view optimal transport as "finding the minimal cost transport plan" we can rephrase the problem as "trying to determine the value/price of each piece of mass at a given location $x \in \cX$ or $y \in \cY$". Namely, if a given $x$ is "close" in terms of $c(x, \cdot)$ to many different $y$ we might suppose any mass at $x$ is more valuable because it is easy to transport. Similarly, if a given $y$ is "far" from most values of $x$ then we might consider mass there more valuable because it is hard to get to. Hence introduce two \textit{price functions} $\psi: \cX \to \R, \phi: \cY \to \R$ which keep track of these prices/values. Call a pair of prices \textit{competitive} if:
+%
+\[ \phi(y) - \psi(x) \leq c(x,y)\]
+
+\noindent Namely, our cost function already gives us some notion of the relationship between these prices because we always transport mass at $x$ to $y$ at cost $c(x,y).$ The goal then is to maximize the profit $\phi(y) - \psi(x)$ according to this constraint, giving us the \red{Kantorovich dual problem}:
+%
+\begin{equation}
+    \sup_{\phi, \psi} \left\{ \int \phi(y) \; d\nu  -\int \psi(x) \; d\mu \quad : \quad \phi - \psi \leq c\right\}
+    \label{eqn:kantorovich_duality}
+\end{equation}
+
+
+
+\noindent Integrating the above inequality with respect to any transport plan $\pi \in \Pi(\mu, \nu)$ gives \blue{weak duality}.
+
+\begin{thm}[Weak Duality]
+    \[\sup_{\phi, \psi} \left\{ \int \phi(y) \; d\nu  -\int \psi(x) \; d\mu \quad : \quad \phi - \psi \leq c\right\} \leq \inf_{\pi \in \Pi(\mu, \nu)} \E_\pi c(X,Y) \]
+\end{thm}
+%
+\noindent Some of the main benefits of the dual formulation of the problem are:
+
+\begin{enumerate}
+    \item \textbf{Lowerbounds for optimal cost}: any pair of competitive prices provides a lower bound.
+    \item \textbf{Functional Analysis: }Gives access to functional analysis tools (we get to work over a space of functions rather than a space of measures)
+\end{enumerate}
+
+\noindent Once we have such duality it is natural to ask (i) what the optimizing pairs $(\phi, \psi)$ and optimizing plans $\pi \in \Pi(\mu, \nu)$ tend to look like, and (ii) when we have equality, aka strong duality. First we focus on the former. 
+
+We start with a simple observation that it is always in our best interests to make $\phi$ as large as possible and $\psi$ as small as possible. In particular, as we are forced to have $\phi \leq \psi + c$ and $\psi \geq  \phi - c$ we might as well choose these inequalities to be as tight as possible. Namely given a competitive pair $(\phi, \psi)$ we can always improve it by replacing these functions with their \red{c-transforms} (note the different defintions between $\cX$ and $\cY$): 
+%
+\begin{equation}
+    \phi^c(x) := \sup_{y \in \cY} \left[\phi(y) - c(x,y) \right] \\
+    \label{eqn:phi^c}
+\end{equation}
+\begin{equation}
+    \psi^c(y) := \inf_{x \in \cX} \left[\psi(x) + c(x,y) \right] \\
+    \label{eqn:psi^c}
+\end{equation}
+
+\noindent Any function of the form $\phi^c$ for some $\phi$ is called \red{c-convex}. Likewise such a function $\psi^c$ is called \red{c-concave}.\\
+
+\noindent \textbf{Example}: In the case $c(x,y) = -xy$ we obtain the standard relationship between convexity and the (negative of) the Legendre transform: a function is convex iff it is the Legendre transform of some function.\\
+
+\noindent \textbf{Example}: In the case $c(x,y) = d(x,y)$ is the underlying metric, then the c-convex functions are just the 1-Lipschitz functions. Moreover, 1-Lipschitz functions are self-conjugate\\
+
+\noindent Now to study an optimal transport plan. The intuition is that if a plan $\pi$ is optimal, there ought to be no way to "reroute" mass while lowering the overall cost. Namely, there should not be a sequence of pairs $\{(x_i, y_i)\}_{i=1}^N$ in the support of $\pi$ so that:
+%
+\[\sum_{i=1}^N c(x_i,y_i) > \sum_{i=1}^N c(x_i, y_{i+1})\]
+
+\noindent This would mean we could take some mass at $x_i$ that was originally going to $y_i$ and instead send it to $y_{i+1}$. By doing this in a cyclic manner, we preserve the total amount of mass each $y_i$ receives just by modifying the sources. This motivates the definition of a \red{c-cyclically monotone set}: a set $\Gamma \subseteq \cX \times \cY$ so:
+\begin{equation}
+   \sum_{i=1}^N c(x_i,y_i) \leq \sum_{i=1}^N c(x_i, y_{i+1})
+   \label{eqn:c-cyclically_monotone}
+\end{equation}
+
+\noindent and we call a transport plan c-cyclically monotone if it is concentrated on such a set. Note since cyclces generate all permutations, this is equivalent to the saying now permutation of the sources can lower the overall cost. Now we are ready to state the main result:
+
+\begin{thm}[Kantorovich Duality] Under our standard assumptions:
+    \begin{enumerate}
+    \item We have strong duality
+    
+    \item We can restrict the dual problem to bounded continuous c-convex/concave functions and their c-transforms (e.g. $(\phi, \phi^c) $ or $(\psi^c, \psi)$).
+    
+    \item $\pi$ is optimal iff it is c-cylically monotone iff $\phi(y) - \psi(x) \leq c(x,y)$ with equality $\pi$ a.s.
+\end{enumerate}
+
+\label{thm:kantorovich_duality}
+\end{thm}
+
+\noindent \textbf{Proof Outline:} The idea is to construct a c-cyclically monotone $\pi$ (which will turn out to be optimal) and use this to construct $\psi(x)$. Then show that:
+%
+\[\int \psi^c(y) \; d\nu - \int \psi(x) = \int c(x,y) \; d\pi(x,y)\]
+%
+\noindent By weak duality, this implies both $\pi, (\psi^c, \psi)$ are optimal once we show this choice of prices are competitive: $\psi^c(y) + \psi(x) \leq c(x,y)$. We procede in a few steps by a series of approximations:
+
+\begin{itemize}
+    \item \textbf{Step 1}: For $c$ continuous $\mu, \nu$ discrete, construct c-cyclically monotone $\pi$ . This is simple as then transport plans are essentially just a finite stochastic matrix.
+
+    \item \textbf{Step 2:} For $c$-continuous, construct a c-cyclically monotone $\pi$ for general $\mu, \nu$ by approximating these distributions by discrete (random) measures and applying step 1. Then take limits.
+
+    \item \textbf{Step 3}: Given such a $\pi$ from step 2, let $\Gamma \subseteq \cX \times \cY$ be its support. Define a candidate "price function" for fixed $(x_0, y_0) \in \Gamma$:
+    %
+    \[\phi(x) := \sup_m \sup_{(x_i, y_i) \in \Gamma} \left\{ \sum_{i=0}^m c(x_i, y_i) - c(x_{i+1}, y_i)\right\}\]
+    \noindent where $x_{m+1} = x$. Namely, the "value" $\phi(x)$ of having an additional unit of mass at $x$ is the largest improvement in cost we could obtain by rerouting some of our transports to utilize this new mass. Show that $\psi^c(y) - \psi(x) = c(x,y)$ on $\Gamma$.
+
+    \noindent \textbf{Step 4}: approximate a general cost function by an increasing sequence of continous (bounded) ones using lower-semicontinuity. 
+\end{itemize}
+
+$\Box$
+
+\noindent \subsection{Applications of Duality}
+
+\noindent The next result shows that under mild assumptions optimal transport plans are stable under limits
+\begin{thm}[Stability]
+    Suppose $c$ is continuous and bounded from below. If $\mu_k \Rightarrow \mu, \nu_k \Rightarrow \nu$ and $C(\mu_k, \nu_k) < \infty$. Then there is some subsequence along which the optimal transport plans $\pi_k \Rightarrow \pi$ the optimal transport plan for $\mu, \nu$.
+\end{thm}
+
+\noindent \textbf{Proof Outline: } The weak convergence of $\mu_k, \nu_k$ implies tightness of the corresponding sequences and hence tightness of the optimal plans $\pi_k$. By Prokorohov's theorem we can hence extra a convergent subsequence $\pi_k \Rightarrow \pi$. It is then just a matter of showing the c-cyclical monotonicity of the $\pi_k$ is preserved, which follows from the weak convergence and continuity of $c$. $\Box$\\
+
+\noindent Our next aim is to use duality to study transport inequalities, inequalities of the form:
+%
+\[C(\mu, \nu) \leq F(\mu) \quad \forall \mu \in \cP(x)\]
+
+\noindent The following says for nice $F$ we can represent these inequalities in terms of a Legendre transform $\Lambda$ over $C_b(\cX)$. Specifically:
+%
+\[\Lambda(\phi) := \sup_{\mu \in P(\cX)} \left( \int_\cX \phi \;d\mu - F(\mu)\right)\]
+\begin{thm}[Dual Transport Inequalities] Suppose the cost function is bounded from below. Let $F:P(\cX) \to \R$ be convex and lower semicontinuous. Then:
+\[C(\mu, \nu) \leq F(\mu) \quad \forall \mu \in P(\cX) \iff\Lambda\left(\int_\cY \phi \; d\nu - \phi^c\right) \leq 0 \quad \forall \phi \in C_b(\cX)\]
+\end{thm}
+
+\noindent \textbf{Proof outline:} Unrolling definitions note:
+
+\[\Lambda\left(\int_\cY \phi \; d\nu - \phi^c\right) = \sup_{\mu \in P(\cX)}\left(\int_\cY \phi \; d\nu - \int_\cX \phi^c \; d\mu - F(\mu)\right)\]\\
+%
+\noindent The first two terms are straight out of the Kantorovich dual problem, so the result will come immediately just by applying duality basically. $\Box$\\
+
+
+
+\noindent \textbf{Example (KL Divergence): } Let $\cX = \cY$ and $F(\mu) := H(\mu | \nu) = \int \rho \log \rho$ for $\rho = \frac{d \mu}{d\nu}$. Then an explicit calculation yields $\Lambda(\phi) = \log \left( \int e^\phi \; d\nu \right)$. Hence:
+%
+\[C(\mu, \nu) \leq H(\mu | \nu) \quad \forall \mu \in P(\cX) \iff e^{\int_\cY \phi \; d\nu} \leq \int e^{\phi^c} \; d\nu\]
+
+\noindent Lastly, we develop a criterion for an existence of a deterministic coupling:
+
+\begin{thm}[Existence of Deterministic Coupling]
+\noindent If $C(\mu, \nu) < \infty$ and any c-convex $\psi:\cX \to \R \cup \{\infty\}$ has:
+%
+\[ \mu\left( \{ x \in \cX \; : \; \psi^c(y) - \psi(x) = c(x,y) \text{ for more than one y} \} \right) = 0\]
+
+\noindent Then there is a unique solution to the optimal transport problem and it is deterministic.
+\label{thm:deterministic_coupling}
+\end{thm}
+
+\noindent \textbf{Proof Outline:} This follows from the fact that at optimality $\pi$ a.s. we have $\psi^c(y) - \psi(x) = c(x,y)$. Hence for $\mu$ a.e. $x$ we can set $T(x)$ to be the unique $y$ mentioned in the assumption. $\Box$\\
+
+\noindent \textbf{Example:} Again in the case $c(x,y) = -xy$ where the c-convex functions are just standard convex functions we have:
+
+\[\psi(x) = \sup_{y} (\psi^c(y^*) + xy) \to \nabla \psi^c(y) = -x\]
+%
+\noindent Since $\psi^c$ is concave, $\nabla \psi^c(y)$ is nonincreasing. Hence it only has countably many "flat" points in its range where $\nabla\psi^c(y) = -x$ can occur. Thus the only way for the set in the statement of Theorem \ref{thm:deterministic_coupling} to have nonzero measure is if $\mu$ has an atom. Hence as long as $\mu$ is nonatomic, a deterministic coupling exists (e.g. we have seen an example of this before in the increasing rearrangement, example 3 on pg 19).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Wasserstein Distances}
+
+\noindent When $\cX = \cY$ can think of the optimal transport cost $C(\mu, \nu)$ as a sort of "distance" between the probability distributions $\mu, \nu$. This is not a true metric in general (it does not necessarily satisfy any of the properties in fact) but if we choose an underlying metric to use as our cost function $c(x,y)$ then we do indeed get a metric, and our hope is that in some sense this metric metrizes the topology of weak convergence. This is indeed the case. For $p \geq 1$ define the \red{Wasserstein distance of order $p$}:
+\begin{equation}
+    W_p(\mu, \nu) := \inf_{\pi \in \Pi(\mu, \nu)} \left[\E d(X,Y)^p \right]^{1/p}
+    \label{eqn:wasserstein_distance}
+\end{equation}
+
+\noindent Restricted to the \red{Wasserstein space}, denoted $P_p(\cX)$, where $W_p(\delta_0, \mu) < \infty$ then $W_p$ is indeed a metric. Namely, this is just the space of measures have "finite moment of order $p$" within the metric space. If $(X,d)$ is bounded then this is just all of $P(\cX)$.\\
+
+\noindent Since $W_1$ is just an optimal transport cost under a specific choice of cost $c(x,y) = d(x,y)$ we can apply Kantorovich duality. We already saw the c-convex functions are just 1-Lipschitz and such functions are self-conjugate. Hence:
+%
+\[W_1(\mu, \nu) = \sup_{1-Lip} \left\{ \int_\cX \psi \; d\mu - \int_\cX \psi \; d\nu \right\}\]
+
+
+
+\subsection{Metrizes Weak Convergence in $P_p(\cX)$}
+
+We introduce a slightly stronger notion than weak convergence. We say $\mu_k$ \red{converges weakly in $P_p(\cX)$} to $\mu$ if $\mu_k \to \mu$ AND $\int d(x_0, x)^p \;d\mu_k \to \int d(x_0, x)^p \;d\mu$. Namely, on top of the standard weak convergence we also assume convergence of the $p^{th}$ moments. This is stronger than standard weak convergence because in general $d^p$ is not a bounded function. If $\cX$ is of bounded diameter then these two notions are equivalent.\\
+
+\begin{thm}
+    $W_p$ metrizes weak convergence in $P_p(\cX)$
+\end{thm}
+
+\noindent \textbf{Proof Outline: } Assume $\mu_k \to \mu$ in $W_p$. By a technical lemma, this implies $\{\mu_k\}$ is tight and hence by Prokohorov's theorem implies it has a weakly convergent subsequence. Use lower semicontinuity of $W_p$ to show whole sequence converges. Use the arithmetic lemma:
+%
+\[d(x_0, x)^p \leq (1+\epsilon)d(x_0,y)^p + C_\epsilon d(x,y)^p\]
+
+\noindent to separate $x,y$. Apply an optimal transfer plan $\pi_k \in \Pi(\mu_k, \mu)$ and take its marginals.\\
+
+\noindent Conversely assume $\mu_k \to \mu$ weakly in $P_p(\cX)$. Again take an optimal $\pi_k \in \Pi(\mu_k, \mu)$ and use tightness / Prokorhov's theorem to extract convergent subsequence. Stability of optimal transport plans implies the limit $\pi$ is optimal as well, and the optimal coupling of $(\mu, \mu)$ is trivially just the identity. Apply a truncation:
+%
+\[W_p(\mu_k, \mu)^p = \int_\cX d(x,y)^p \; d\pi_k = \int_\cX [d(x,y)^p \wedge R + (d(x,y)^p - R^p)_+] \; d\pi_k\]
+
+\noindent The first term is bounded/cts so just apply standard weak convergence. Use convergence in $P_p(\cX)$ (the "finite $p^{th}$ moments condition) to handle the second term. $\Box$
+
+
+
+
+%%%%%%%%%%%%%
+\subsection{Controlled by Weighted TV distance}
+
+\noindent Note this text defines:
+%
+\begin{equation}
+||\mu - \nu||_{TV} = 2 \inf_{\pi \in \Pi(\mu, \nu)} \P_\pi(X \neq  Y)
+\label{eqn:tv_distance}
+\end{equation}
+%
+\noindent which is twice the definition I am used to.\\
+
+\noindent Next we aim to show if we weight the TV distance we get an upperbound of $W_p$.
+
+\begin{thm}[$W_p$ controlled by weighted TV] 
+\noindent Suppose $p \geq 1$ and $p^{-1} + q^{-1} = 1.$ Fix $x_0 \in \cX$. Then:
+%
+    \[W_p(\mu, \nu) \leq 2^{1/q} \left(\int d(x_0, x)^p \; d|\mu - \nu|(x) \right)^{1/p}\]
+\end{thm}
+
+\noindent \textbf{Proof outline}: The idea is to use the same coupling $\pi$ of $\mu, \nu$ that minimizes \ref{eqn:tv_distance}. The idea is to keep all the mass that $\mu, \nu$ share fixed and distribute the rest uniformly. Then a simple calculation yields the result. $\Box$.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=2in, height=2in]{images/coupling.PNG}
+    \label{fig:coupling_TV}
+\end{figure}
+
+
+\subsection{Topological Properties of Wasserstein Space}
+
+\noindent The next theorem shows the Wasserstein space shares many of the properties of the underlying metric space $\cX$. 
+
+\begin{thm}
+    If $(\cX, d)$ is Polish then so is $(P_p(\cX), W_p)$. Moreover, any measure can be approximated by ones with finite support (discrete measures).
+\end{thm}
+
+\noindent \textbf{Proof Idea:} For separability let $x_i$ be a countable dense subset of $\cX$. Then:
+
+\[\left\{ \sum_{i=1}^n a_i \delta_{x_i} \; : a_i \in \mathbb{Q}, \; n \in \N\right\} \subseteq P_p(\cX)\]
+\noindent is countable and dense.\\
+
+\noindent For completeness, show that Cauchy in $W_p$ implies tightness, and hence by Prokorhov's theorem there exists a weakly convergent subsequence. This gives a candidate for the limit. Fatou's lemma shows this is in $P_p(\cX)$ so we just must show weak convergence in $P_p(\cX)$. We just use the lower semicontinuity of $W_p$ to show $W_p(\mu_k, \mu) \to 0.$ $\Box$
+
+
+
+\newpage
+\section{Displacement Interpolation}
+
+
+
+
+
+
+
+\end{document}
