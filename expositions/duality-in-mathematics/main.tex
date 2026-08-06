@@ -2,6 +2,7 @@
 
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{xcolor}
@@ -137,6 +138,15 @@ the recovery statement precise:
   C^{**}=\overline{\operatorname{cone}(\operatorname{conv}C)}.
 \]
 In particular, $C^{**}=C$ whenever $C$ is a closed convex cone.
+
+Dual cones arise naturally in constrained optimization, particularly in the
+Karush--Kuhn--Tucker (KKT) conditions discussed below. Near a candidate
+solution $x$, the primal constraints determine a cone of feasible directions
+in which $x$ may move while remaining feasible. Passing to the dual cone
+translates these constraints on the input directions into constraints on the
+gradients at $x$. This is the geometric mechanism by which the KKT conditions
+convert a constrained primal problem into conditions involving the objective
+and constraint gradients.
 
 \begin{figure}[ht]
   \centering
@@ -361,50 +371,56 @@ and only if its epigraph
 \[
   \operatorname{epi}(f):=\{(x,y)\in V\times\R:y\geq f(x)\}
 \]
-is convex. The convex conjugate is defined so that
+is convex. The convex conjugate is defined so that the line
 \[
-  \langle\ell,x\rangle-f^*(\ell)\leq f(x)
+  g_\ell(x) := \langle\ell,x\rangle-f^*(\ell)\leq f(x)
   \qquad\text{for every }x\in V.
 \]
-It therefore selects the highest affine function of slope $\ell$ that lies
+It therefore selects the highest affine function $g_\ell(x)$ of slope $\ell$ that lies
 entirely below $f$. In one dimension these supporting hyperplanes are simply
 supporting lines.
 
-\begin{figure}[ht]
+In general, $f^{**} \leq f$, but if $f$ is a proper, lower semi-continuous, 
+convex function then $f^{**} = f$ by the Fenchel–Moreau theorem. Geometrically, 
+this is almost obvious: the convex conjugate of a function encodes the set of affine functions, 
+that lie completely below $f$, and the biconjugate then takes the supremum of all these lines.
+Since any nice enough convex function equals the supremum of all affine functions 
+that lie below it, we get equality. Hence again we see duality manifests itself as an involution,
+at least when restricted to the proper class of objects. 
+
+Algebraically, after identifying $V^{**}$ with $V$, we see
+%
+  \[f^{**}(x) = \sup_{\ell \in V^*} \{\ell(x) - f^*(\ell)\} = \sup_{\ell \in V^*} g_\ell(x) \leq f(x).\]
+%
+
+
+
+\begin{figure}[t]
   \centering
   \includegraphics[width=.72\textwidth]{images/convex-conjugate.png}
   \caption{Supporting lines below the convex function $f(x)=x^2$.}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Duality in Convex Optimization
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Duality in Convex Optimization}
+
 Suppose we want to solve the convex optimization problem
-\[
+
+\begin{equation}
   \min_x f(x)
   \qquad\text{subject to}\qquad
   g_i(x)\leq0,\quad i\in[m],
-\]
-where $f$ and the $g_i$ are convex. For simplicity, assume all these functions
-are differentiable.
-
-\subsection{Duality Through Perturbation}
-
-The discussion of perturbation duality in
-\href{https://math.stackexchange.com/questions/223235/please-explain-the-intuition-behind-the-dual-problem-in-optimization}{this
-Math Stack Exchange post} is quite informative.
-
-\subsection{Strong Duality}
-
-\emph{This section remains to be completed.}
-
-\subsection{Examples of Duality in Optimization}
+  \label{eqn:convex_optimization_problem}
+\end{equation}
+  
+\noindent where $f$ and the $g_i$ are convex. For simplicity, assume all these functions
+are differentiable. Below, we discuss two geometric interpretations of duality in this setting. 
 
 \subsubsection{Lagrangian Duality}
 
-These
-\href{https://www.mit.edu/~gfarina/2025/67220s25_L03_more_on_normal_cones/L03.pdf}{course
-notes} are useful for understanding normal cones in Lagrangian duality.
-
-Lagrangian duality begins with the observation that if $x^*$ minimizes the
-optimization problem, then
+\noindent Lagrangian duality begins by observing if $x^*$ minimizes \eqref{eqn:convex_optimization_problem}, then
 \[
   \langle-\nabla f(x^*),v\rangle\leq0
 \]
@@ -521,9 +537,92 @@ Hence the dual problem is
   \quad\lambda\geq0.
 \]
 
-\subsubsection{Kantorovich Duality}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Duality Through Perturbation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Duality Through Perturbation}
 
-\emph{To be completed: interpret the functions $\phi$ and $\psi$ in the
-Kantorovich dual problem.}
+The key idea is this: given an optimization problem, we don't obtain a dual problem 
+until we specify how to perturb the optimization problem. This is why equivalent formulations 
+of an optimization problem can lead to different dual problems: we simply perturb the system differently.
+
+To be a bit more concrete, suppose our optimaztion problem is of the form
+%
+  \[\min_x \; \phi(x, 0),\]
+%
+
+\noindent for some convex function $\phi: X \times Y \to \overline{R}$. Here, we essentially use
+$\phi(x, 0) = \infty$ to encode constraints on $x$. We can then define the perturbed optimization problem as
+%
+  \[h(y) := \min_x \; \phi(x, y).\]
+%
+\noindent Our original problem then seeks to calculate $h(0)$. Recall that the convex biconjugate
+gives a lower bound: $h^{**}(0) \leq h(0)$ (\emph{weak duality})) and for convex functions we often have equality
+(\emph{strong duality}) by the Fenchel-Moreau theorem. The dual problem is then to calculate 
+
+\[h^{**}(0) = \sup_{\ell \in Y^*}\{-h^*(\ell)\} = - \inf_{\ell \in Y^*} h^*(\ell) = - \inf_{\ell \in Y^*} \phi^*(0, \ell).\]
+
+For example, if we define the perturbated problem by allowing less slack in the constraints
+
+\[\phi(x, y) = \begin{cases}
+  f(x) & \text{if } g_i(x) + y_i \leq 0, \; i = 1, \ldots, m,\\
+    +\infty & \text{otherwise},
+\end{cases}\]
+%
+then by introducing slack variables $s_i = -y_i - g_i(x) \geq 0$, we see
+%
+\begin{align*}
+  -\phi^*(0, \lambda) & := -\sup_{x,y} \left\{\langle 0, x \rangle + \langle \lambda, y \rangle - \phi(x, y) \right\} \\
+  %
+  & = -\sup_{s \geq 0, x} \left\{-\langle \lambda, s + g(x) \rangle - f(x) \right\} \\[5pt]
+      %
+  & = \begin{cases}
+           \inf_x \{f(x) + \langle \lambda, g_i(x) \rangle\} & \lambda \geq 0,\\
+           - \infty & \text{otherwise}.
+      \end{cases}
+\end{align*}
+\noindent Thus the dual problem becomes
+%
+  \[\sup_{\lambda \geq 0} \inf_x L(x, \lambda), \quad L(x, \lambda) := f(x) + \langle \lambda, g_i(x) \rangle, \]
+%
+\noindent so we recover Lagrangian duality. This makes two things immediately clear:
+%
+\begin{enumerate}[label=(\roman*)]
+  \item Assuming strong duality and attainment, a primal-dual optimal
+  pair $(x^*,\lambda^*)$ is a saddle point of the Lagrangian. In particular,
+  \[
+    L(x^*,\lambda)
+    \leq L(x^*,\lambda^*)
+    \leq L(x,\lambda^*)
+  \]
+  for every $x$ and every $\lambda\geq 0$. Thus $x^*$ minimizes
+  $x\mapsto L(x,\lambda^*)$, while $\lambda^*$ maximizes
+  $\lambda\mapsto L(x^*,\lambda)$ over $\lambda\geq0$.
+
+  \item Since $\partial L / \partial g_i = \lambda_i$, the dual variable $\lambda_i^*$ measures the sensitivity of the
+  optimal value to perturbations of the $i$th constraint. Under suitable
+  regularity conditions, it gives the marginal cost of tightening that
+  constraint, or equivalently the marginal benefit of relaxing it.
+\end{enumerate}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Duality In Optimal Transport: Kantorovich Duality
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\subsection{Duality in Optimal Transport: Kantorovich Duality}
+
+
+\section{Useful References}
+
+Here I collect some useful references if you are interested in reading more about these topics.
+
+\begin{enumerate}
+  \item \href{https://web.stanford.edu/~boyd/cvxbook/}{Stephen Boyd and Lieven Vandenberghe, \emph{Convex Optimization}}
+  \item \href{https://link.springer.com/book/10.1007/978-3-540-71050-9}{C\'edric Villani, \emph{Optimal Transport: Old and New}} (Chapter~5)
+  \item \href{https://www.mit.edu/~gfarina/2025/67220s25_L03_more_on_normal_cones/L03.pdf}{Dual Cones in Lagrangian Duality}
+  \item \href{https://math.stackexchange.com/questions/223235/please-explain-the-intuition-behind-the-dual-problem-in-optimization}{Perturbation Interpretation of Duality}.
+\end{enumerate}
+
 
 \end{document}
