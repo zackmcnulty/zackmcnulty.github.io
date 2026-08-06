@@ -4,3 +4,21 @@ _site
 .jekyll-metadata
 vendor
 .DS_Store
+assets/images/slideshow/*.HEIC
+assets/images/slideshow/*.heic
+
+# LaTeX build artifacts (compiled PDFs remain tracked)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.nlo
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
