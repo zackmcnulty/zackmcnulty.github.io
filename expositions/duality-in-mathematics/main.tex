@@ -18,6 +18,7 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\Pp}{\mathbb{P}}
+\newcommand{\Rbar}{\overline{\mathbb{R}}}
 
 \title{Duality in Mathematics}
 \author{Zachary McNulty}
@@ -26,43 +27,37 @@
 \begin{document}
 \maketitle
 
-In convex optimization, one often sees references to \emph{dual problems},
-which give an equivalent yet distinct viewpoint on the same optimization
-problem. Lagrangian and Kantorovich duality are two classical examples, which
-we discuss below. In this short note, we explore the general notion of duality:
-how it arises, why it is so natural, and what we can do with it.
-
-Below, let $V$ be an arbitrary normed real vector space, and let $V^*$ denote
-its dual space: the space of linear functionals on $V$. For our purposes, we
-will think of $V=\R^d$, so that we can ignore some necessary regularity
-assumptions that appear in infinite dimensions. Even though $\R^d$ is
-self-dual, it is convenient to denote $V$ and $V^*$ separately.
-
-The discussion of perturbation duality in
-\href{https://math.stackexchange.com/questions/223235/please-explain-the-intuition-behind-the-dual-problem-in-optimization}{this
-Math Stack Exchange post} is quite informative. These
-\href{https://www.mit.edu/~gfarina/2025/67220s25_L03_more_on_normal_cones/L03.pdf}{course
-notes} are also useful for understanding normal cones in Lagrangian duality.
-
-\section{What Is Duality in Mathematics?}
-
 Duality is a somewhat ill-defined principle in mathematics, but it generally
 describes the idea that problems in one setting can often be translated to
 problems in another setting in a one-to-one fashion, often in the form of an
 \emph{involution}. This becomes particularly useful when the dual space has
 some structure that the primal space lacks, allowing us to apply a different
-set of tools to study the same underlying problem.
+set of tools to study the same underlying problem, or when the problem
+somehow simplifies dramatically in the dual setting. In this note we will
+explore several realizations of this phenomenon. These examples do not all
+arise from a single formal construction; rather, they share the recurring
+themes of translation, reversal, and the recovery of one object from another.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% What is Duality in Mathematics?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Motivating Examples of Duality}
 
 We begin with some simple examples and move toward more sophisticated
 applications. Some of the more complicated examples can be skipped on a first
-reading and revisited after the rest of the note.
+reading.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Set complements
+%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Set Complements}
 
-Given a subset $A\subseteq S$, properties of $A$ can often be framed in terms
+Given a subset $A\subseteq S$ of some set $S$, properties of $A$ can often be framed in terms
 of its complement $A^c$. For example, in topology a set $A$ is closed if and
 only if $A^c$ is open. This allows us to state many topological properties in
-terms of either open sets or closed sets:
+terms of either open sets or closed sets, for example:
 
 \begin{itemize}
   \item \emph{Continuity}: the preimage of every open set is open if and only
@@ -73,23 +68,75 @@ terms of either open sets or closed sets:
   \item \emph{Closure and interior}: $\operatorname{Int}(S)^c=\overline{S^c}$.
   \item \emph{Denseness}: every open set $U\subseteq X$ intersects $S$ if and
   only if $\overline S=X$.
-  \item \emph{Hausdorffness}: every $x,y$ can be separated by open sets if and
+  \item \emph{The $T_1$ separation property}: every singleton is closed if and
   only if $\{x\}=\bigcap_{F\in C_x}F$, where
   $C_x=\{F\text{ closed}:x\in F\}$.
 \end{itemize}
 
 The map $A\mapsto A^c$ is an involution, and $A\subseteq B$ implies
-$A^c\supseteq B^c$, so it reverses the natural inclusion order.
+$A^c\supseteq B^c$, so it reverses the natural inclusion order. Here, duality
+is the idea that in the framework of topology, we can often translate statements
+about open sets to statements about closed sets, and vice versa.
 
+%%%%%%%%%%%%%%%%%%%
+%  Dual Vector Spaces
+%%%%%%%%%%%%%%%%%%%
+\subsection{Dual Vector Spaces}
+
+Given a normed vector space $V$, define its \emph{continuous dual space} by
+\[
+  V^*:=\{\phi:V\to\R:\phi\text{ is a bounded linear functional}\}.
+\]
+If $V$ is a real Hilbert space, the Riesz representation theorem says that
+every $\phi\in V^*$ has a unique representation
+\[
+  \phi(x)=\langle x,v_\phi\rangle
+\]
+for some $v_\phi\in V$. The correspondence $\phi\mapsto v_\phi$ is a canonical
+isometric isomorphism $V^*\cong V$. This duality is useful because $V^*$ is a
+space of scalar-valued functions, allowing analytic statements about
+functionals to be translated into geometric statements about vectors.
+
+For example, the derivative of a differentiable functional $F:V\to\R$ is
+naturally an element $DF(x)\in V^*$. Riesz representation produces the
+gradient $\nabla F(x)\in V$ characterized by
+\[
+  DF(x)[h]=\langle\nabla F(x),h\rangle
+  \qquad\text{for every }h\in V.
+\]
+Thus the familiar gradient is the vector representative of the derivative,
+an observation underlying gradient-based optimization in Hilbert spaces.
+
+A bounded linear map $T:V\to W$ induces a dual map
+\[
+  T':W^*\to V^*,\qquad T'(\phi):=\phi\circ T.
+\]
+Notice that the direction of the arrow is reversed. When $V$ and $W$ are
+Hilbert spaces, the Riesz identifications turn $T'$ into the Hilbert-space
+adjoint $T^*:W\to V$, characterized by
+\[
+  \langle Tx,y\rangle_W=\langle x,T^*y\rangle_V.
+\]
+Finally, the evaluation map $V\to V^{**}$ is an isometric isomorphism for a
+Hilbert space, so Hilbert spaces are \emph{reflexive}. In this precise sense,
+taking the continuous dual twice recovers the original space.
+
+%%%%%%%%%%%%%%%%%%%
+% Dual Cones
+%%%%%%%%%%%%%%%%%%%
 \subsection{Dual Cones}
 
 Given $C\subseteq V$, define its \emph{dual cone} by
 \[
   C^*:=\{v\in V^*: \langle v,x\rangle\geq 0\quad\text{for every }x\in C\},
 \]
-where $\langle v,x\rangle:=v(x)$ applies the dual functional to $x$. As in the
-previous example, this duality reverses the natural inclusion order. However,
-it is an involution only under suitable conditions on $C$.
+where $\langle v,x\rangle:=v(x)$ applies the dual functional to $x$. Again,
+this duality reverses the natural inclusion order. The bipolar theorem makes
+the recovery statement precise:
+\[
+  C^{**}=\overline{\operatorname{cone}(\operatorname{conv}C)}.
+\]
+In particular, $C^{**}=C$ whenever $C$ is a closed convex cone.
 
 \begin{figure}[ht]
   \centering
@@ -97,15 +144,9 @@ it is an involution only under suitable conditions on $C$.
   \caption{A cone and its dual cone.}
 \end{figure}
 
-\subsection{Dual Vector Spaces}
-
-Probably the most iconic instance of duality is the dual of a vector space.
-Given $V$, define $V^*$ as the set of all linear functionals
-$\phi:V\to\R$. This duality is useful because $V^*$ is a space of
-\emph{functions}, allowing us to apply a wide range of tools from functional
-analysis. Linear maps $T:V\to W$ induce linear maps $T^*:W^*\to V^*$ via
-$T^*(\phi):=\phi\circ T$. Notice that the direction of the arrow is reversed.
-
+%%%%%%%%%%%%%%%%%%%
+% Dual Graphs
+%%%%%%%%%%%%%%%%%%%
 \subsection{Dual Graphs}
 
 Any planar graph $G$ divides two-dimensional space into a collection of closed
@@ -114,8 +155,9 @@ region. We define another graph $G^*$ by adding one vertex for each face and
 an edge between two vertices whenever their corresponding faces are adjacent
 along an edge of $G$. Generally, $G^*$ depends on the chosen planar embedding,
 but many of its properties are invariant under the embedding. Here duality is
-a genuine involution in the sense that, once an embedding is fixed,
-$G^{**}\cong G$.
+a genuine involution for connected plane graphs: once the embedding is fixed,
+$G^{**}\cong G$, with bridges and loops interpreted in the usual
+plane-multigraph sense.
 
 The graph $G^*$ encodes connectivity in the original graph. One manifestation
 of this is the relationship between cycles and cut sets. A cut set is a subset
@@ -137,19 +179,25 @@ There exists $p<1$ such that $\Pp(0\leftrightarrow\infty)>0$.
 \end{lemma}
 
 \begin{proof}
-This is a classical Peierls-style argument. A given dual path $\gamma$ of
-length $n$ is closed with probability $(1-p)^n$. Since there are at most three
-non-backtracking choices at every step, there are at most $3^n$ candidate paths
-of length $n$. If the origin is not connected to infinity, some closed dual
-cycle must surround it. Therefore, by the union bound,
+This is a classical Peierls-style argument. For a fixed dual circuit $\gamma$
+of length $n$, every crossed primal edge must be absent, an event of
+probability $(1-p)^n$. A circuit of length $n$ surrounding the origin must
+cross a fixed ray from the origin within distance at most $n$. After choosing
+such a crossing edge, there are at most three non-backtracking choices at each
+subsequent step. Thus, for some absolute constant $C$, the number of candidate
+circuits is at most $Cn3^n$. If the origin is not connected to infinity, some
+closed dual circuit must surround it. Therefore, by the union bound,
 \[
   \Pp(0\not\leftrightarrow\infty)
-  \leq \sum_{n\geq4}3^n(1-p)^n
-  =\frac{3^4(1-p)^4}{3p-2},
+  \leq C\sum_{n\geq4}n[3(1-p)]^n,
 \]
-which is less than one when $p$ is sufficiently close to one.
+which tends to zero as $p\uparrow1$ and is therefore less than one for $p$
+sufficiently close to one.
 \end{proof}
 
+%%%%%%%%%%%%%%%%%%%
+% Duality in Population Genetics
+%%%%%%%%%%%%%%%%%%%
 \subsection{Duality in Population Genetics}
 
 In population genetics, we study how the genetic makeup of a population
@@ -167,35 +215,36 @@ then
   X_{t+1}\sim\operatorname{Binomial}(N,p_t),
   \qquad p_t:=\frac{X_t}{N}.
 \]
-To model selection, introduce a bias $\alpha\geq0$ favoring $A$ and set
+To obtain a nontrivial diffusion limit with selection, introduce a weak bias
+$\alpha/N$ favoring $A$ and set
 \[
   X_{t+1}\sim\operatorname{Binomial}(N,p_t),
-  \qquad p_t:=\frac{(1+\alpha)X_t}{N+\alpha X_t}.
+  \qquad p_t:=\frac{(1+\alpha/N)X_t}{N+(\alpha/N)X_t}.
 \]
-After taking $N\to\infty$ and speeding up time, one obtains the Wright--Fisher
-diffusion
+After taking $N\to\infty$ and accelerating time by a factor of $N$, one
+obtains the Wright--Fisher diffusion
 \[
   dp_t=\alpha p_t(1-p_t)\,dt+\sqrt{p_t(1-p_t)}\,dW_t.
 \]
 Both the drift in allele frequency and the random fluctuations depend on
 $p(1-p)$, which measures, in a sense, the distance from fixation.
 
-The backward-time dynamics can be simpler. We seek a function $f(p,n)$ relating
+The backward-time dynamics can be simpler. We seek a function $H(p,n)$ relating
 the forward and backward processes such that
 \[
-  \frac{d}{du}\E[f(p(u),n(t-u))]=0,
+  \frac{d}{du}\E[H(p(u),n(t-u))]=0,
   \qquad 0\leq u\leq t,
 \]
 and hence
 \[
-  \E[f(p(t),n(0))]=\E[f(p(0),n(t))].
+  \E[H(p(t),n(0))]=\E[H(p(0),n(t))].
 \]
 If $L$ and $G$ are the generators of $p_t$ and $n_t$, respectively, this is
-suggested by the generator relationship
+suggested by finding a duality function $H(p,n)$ satisfying
 \[
-  Lf_n(p)=Gf_p(n),
-  \qquad f_n(p)=f_p(n):=f(n,p).
+  L_pH(p,n)=G_nH(p,n),
 \]
+where the subscripts indicate which variable the generator acts upon.
 
 In the neutral case $\alpha=0$, $p_t$ has generator
 \[
@@ -207,9 +256,9 @@ generator
 \[
   Gg(n)=-\binom{n}{2}\bigl(g(n)-g(n-1)\bigr).
 \]
-These generators suggest $f(n,p)=p^n$, because
+These generators suggest $H(p,n)=p^n$, because
 \[
-  Lf_n(p)=Gf_p(n)=-\binom{n}{2}(p^n-p^{n-1}).
+  L_pH(p,n)=G_nH(p,n)=-\binom{n}{2}(p^n-p^{n-1}).
 \]
 This gives the duality relationship
 \[
@@ -227,7 +276,16 @@ converges to $p(0)$. Consequently, the probability that $A$ ultimately fixes is
 $p(0)$, a conclusion that is much easier to obtain from the dual process than
 directly from the diffusion.
 
-\section{Convex Sets and Supporting Hyperplanes}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Duality in Convex Analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Duality in Convex Analysis}
+
+
+%%%%%%%%%%%%%%%%%%%
+% Convex Sets and Supporting Hyperplanes
+%%%%%%%%%%%%%%%%%%%
+\subsection{Convex Sets and Supporting Hyperplanes}
 
 A set $X\subseteq V$ is \emph{convex} if it is closed under affine
 combinations:
@@ -265,10 +323,10 @@ It encodes the supporting level associated with each dual direction, and
 Thus convex analysis contains a duality between convex sets and linear
 functionals, with $\sigma_X$ encoding the relationship.
 
-\section{Convex Conjugates}
+\subsection{Convex Conjugates}
 
 A set $X$ is closed and convex if and only if its indicator function
-$\iota_X:V\to\overline\R$,
+$\iota_X:V\to\Rbar$, where $\Rbar:=\R\cup\{+\infty\}$,
 \[
   \iota_X(x):=
   \begin{cases}
@@ -285,11 +343,12 @@ records the maximal value of the objective $\ell$ subject to that constraint.
 For example, if $X=\{x:\lVert x\rVert_2\leq1\}$ is the Euclidean unit ball,
 then
 \[
-  \sigma_X(\ell)=\sup_{x\in X}\ell^\top x=\lVert\ell\rVert_2.
+  \sigma_X(\ell)=\sup_{x\in X}\ell(x)=\lVert\ell\rVert_2,
 \]
+where in the last equality we identify $\ell$ with its Riesz representative.
 
-For a general convex function $\phi:V\to\overline\R$, define its
-\emph{convex conjugate} $\phi^*:V^*\to\overline\R$ by
+For a general convex function $\phi:V\to\Rbar$, define its
+\emph{convex conjugate} $\phi^*:V^*\to\Rbar$ by
 \[
   \phi^*(\ell):=\sup_{x\in V}\{\ell(x)-\phi(x)\}.
 \]
@@ -317,8 +376,6 @@ supporting lines.
   \caption{Supporting lines below the convex function $f(x)=x^2$.}
 \end{figure}
 
-\section{Duality in Convex Analysis}
-
 Suppose we want to solve the convex optimization problem
 \[
   \min_x f(x)
@@ -330,15 +387,21 @@ are differentiable.
 
 \subsection{Duality Through Perturbation}
 
-\emph{This section remains to be completed.}
+The discussion of perturbation duality in
+\href{https://math.stackexchange.com/questions/223235/please-explain-the-intuition-behind-the-dual-problem-in-optimization}{this
+Math Stack Exchange post} is quite informative.
 
 \subsection{Strong Duality}
 
 \emph{This section remains to be completed.}
 
-\section{Examples of Duality in Optimization}
+\subsection{Examples of Duality in Optimization}
 
-\subsection{Lagrangian Duality}
+\subsubsection{Lagrangian Duality}
+
+These
+\href{https://www.mit.edu/~gfarina/2025/67220s25_L03_more_on_normal_cones/L03.pdf}{course
+notes} are useful for understanding normal cones in Lagrangian duality.
 
 Lagrangian duality begins with the observation that if $x^*$ minimizes the
 optimization problem, then
@@ -346,7 +409,9 @@ optimization problem, then
   \langle-\nabla f(x^*),v\rangle\leq0
 \]
 for every feasible direction $v$: there is no direction in which we can both
-remain feasible and decrease the objective.
+remain feasible and decrease the objective. The discussion below gives the
+geometric intuition; turning these linearized conditions into necessary
+optimality conditions requires an appropriate constraint qualification.
 
 First consider a single equality constraint,
 \[
@@ -413,17 +478,20 @@ If $x^*$ solves the primal problem, then
 \]
 This motivates the dual problem
 \[
-  \max_{\lambda\geq0}h(\lambda).
+  \sup_{\lambda\geq0}h(\lambda).
 \]
-The inequality $h(\lambda^*)\leq f(x^*)$ is \emph{weak duality}. Under
-additional assumptions, such as Slater's condition, equality holds and we
-obtain \emph{strong duality}:
+The inequality $h(\lambda)\leq f(x^*)$ for every $\lambda\geq0$, and hence
 \[
-  \max_{\lambda\geq0}h(\lambda)
+  \sup_{\lambda\geq0}h(\lambda)\leq f(x^*),
+\]
+is \emph{weak duality}. Under additional assumptions, such as Slater's
+condition, equality holds and we obtain \emph{strong duality}:
+\[
+  \sup_{\lambda\geq0}h(\lambda)
   =\min_{x\text{ feasible}}f(x).
 \]
 
-\subsubsection{Application: Duality in Linear Programming}
+\paragraph{Application: Duality in Linear Programming.}
 
 A linear program is a convex optimization problem whose objective and
 constraints are linear:
@@ -453,7 +521,7 @@ Hence the dual problem is
   \quad\lambda\geq0.
 \]
 
-\subsection{Kantorovich Duality}
+\subsubsection{Kantorovich Duality}
 
 \emph{To be completed: interpret the functions $\phi$ and $\psi$ in the
 Kantorovich dual problem.}
