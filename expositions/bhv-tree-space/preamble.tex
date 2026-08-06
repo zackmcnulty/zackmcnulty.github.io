@@ -1,8 +1,8 @@
-\documentclass{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{subcaption}
 \usepackage{listings}
-\usepackage{geometry}
+\usepackage[margin=1in]{geometry}
 \usepackage[bottom]{footmisc}
 \usepackage{verbatim}
 \usepackage{amsmath}
@@ -21,7 +21,6 @@
 % allows for figures and captions
 \usepackage{graphicx}
 \usepackage{caption}
-\usepackage{dblfloatfix}
 % allows to specify which token to use in enumerate
 \usepackage{enumitem}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -30,8 +29,6 @@
 \usepackage{accents}
 
 % for automatically making an index for notes (use \printindex at end of document
-\usepackage{makeidx}
-\makeindex
 
 % independence symbol
 % usage:
@@ -67,14 +64,14 @@
 % Figure Drawing Packages
 \usepackage{tikz}
 \usepackage{pgfplots}
-\pgfplotsset{width=10cm,compat=1.9}
+\pgfplotsset{width=10cm,compat=1.18}
 
 
 % Proof environment with [] ending
 \newenvironment{Proof}{\noindent {\sc Proof:}}{$\Box$ \vspace{2 ex}}
 
 % Draw a horizontal bar across length of page
-\newcommand{\hacross}{\noindent\rule{15.2cm}{0.4pt}\\}
+\newcommand{\hacross}{\noindent\rule{\linewidth}{0.4pt}}
 
 % Useful packages for drawing commutative diagrams!
 %\usepackage{pst-node}
