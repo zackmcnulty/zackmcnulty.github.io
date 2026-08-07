@@ -12,9 +12,9 @@
       {% assign current = page.url %}
       <a {% if current == '/' %}class="active" aria-current="page"{% endif %} href="{{ '/' | relative_url }}">About</a>
       <a {% if current contains '/cv' %}class="active" aria-current="page"{% endif %} href="{{ '/cv/' | relative_url }}">CV</a>
-      <a {% if current contains '/organizational' %}class="active" aria-current="page"{% endif %} href="{{ '/organizational/' | relative_url }}">Organizational</a>
-      <a {% if current contains '/coursework' %}class="active" aria-current="page"{% endif %} href="{{ '/coursework/' | relative_url }}">Coursework</a>
       <a {% if current contains '/exposition' %}class="active" aria-current="page"{% endif %} href="{{ '/exposition/' | relative_url }}">Exposition</a>
+      <a {% if current contains '/organizational' %}class="active" aria-current="page"{% endif %} href="{{ '/organizational/' | relative_url }}">Mentorship &amp; Seminars</a>
+      <a {% if current contains '/coursework' %}class="active" aria-current="page"{% endif %} href="{{ '/coursework/' | relative_url }}">Coursework</a>
       <a {% if current contains '/miscellaneous' %}class="active" aria-current="page"{% endif %} href="{{ '/miscellaneous/' | relative_url }}">Miscellaneous</a>
     </nav>
   </div>
